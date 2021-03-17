@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+        }
+
+        .leftpart {
+            width: 500px;
+            height: 500px;
+            margin: 5px;
+        }
+    </style>
+    <title>Control</title>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.9.1/dijit/themes/soria/soria.css" />
+    <script>dojoConfig = { async: true, gfxRenderer: "svg,silverlight,vml" }</script>
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js"></script>
+
+    <script>
+
+	var bewege = null;
+	var changeSpeed = null;
+
+	require(["dojo/dom", "dijit/form/HorizontalSlider", "dijit/form/HorizontalRuleLabels", "dojox/gfx", "dojo/domReady!"],
+		function (dom, HorizontalSlider, HorizontalRuleLabels, gfx) {
+
+            //Opening Socket
+		    var ws = new WebSocket("ws://localhost:26192/api/EngineControl/controller");
+		    const statusBox = document.querySelector("#statusBox");
+
+		    ws.onopen = function () {
+		        statusBox.innerHTML = "Connected &#9786;";
+		    }
+		    ws.onerror = function (event) {
+		        statusBox.innerHTML = "Could not connect &#9785;";
+		    };
+
+            //Changing the speed on ENGINE client
+		    changeSpeed = function (newspeed) {
+		        statusBox.innerHTML = "Sent Message: " + newspeed;
+		        if (ws.readyState == 1) {
+		            ws.send(newspeed);
+		        }
+			}
+
+			var slider = new HorizontalSlider({
+				name: "slider",
+				value: 3,
+				minimum: -10,
+				maximum: 10,
+				discreteValues: 21,
+				intermediateChanges: true,
+				style: "width:300px;",
+				onChange: changeSpeed
+			}, "slider");
+
+			var hLabels = new HorizontalRuleLabels({
+				container: "bottomDecoration",
+				style: "width:260px;margin-left:20px;height:2em;font-size:75%;color:gray;"
+			}, "SliderLabels");
+		}
+	);
+    </script>
+</head>
+<body class="soria">
+    <h1>Control</h1><hr />
+    <div id="statusBox">Connecting ... </div><hr />
+    <div>
+        <div id="slider"></div>
+        <ol id="SliderLabels">
+            <li>-10</li>
+            <li>0</li>
+            <li>10</li>
+        </ol>
+    </div>
+</body>
+</html>

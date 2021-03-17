@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- saved from url=(0144)https://bildungsportal.sachsen.de/opal/g/PEEK_VIEW_WRAPPER-%2D18783961095-%2D98189604882770-%2D88800632029426_global/tutorial/example7_chat.html -->
+<html class="gr__bildungsportal_sachsen_de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+	<title>WebSocket Client</title>
+	<style>
+		#output {
+			border: solid 1px #000;
+		}
+	</style>
+</head>
+<body data-gr-c-s-loaded="true" cz-shortcut-listen="true">
+
+<form id="form">
+	<input type="text" id="message">
+	<button type="submit">Send</button>
+</form>
+
+<hr>
+<div id="output"></div>
+
+<script type="text/javascript">
+
+var inputBox = document.getElementById("message");
+var output = document.getElementById("output");
+var form = document.getElementById("form");
+
+try {
+	var host = "ws://localhost:3000/stuff";
+	console.log("Host:", host);
+
+	var s = new WebSocket(host);
+
+	s.onopen = function (e) {
+		console.log("Socket opened.");
+	};
+
+	s.onclose = function (e) {
+		console.log("Socket closed.");
+	};
+	
+	s.onmessage = function (e) {
+		console.log("Socket message:", e.data);
+		var p = document.createElement("p");
+		p.innerHTML = e.data;
+		output.appendChild(p);
+	};
+	
+	s.onerror = function (e) {
+		console.log("Socket error:", e);
+	};
+	
+} catch (ex) {
+	console.log("Socket exception:", ex);
+}
+
+form.addEventListener("submit", function (e) {
+	e.preventDefault();
+	s.send(inputBox.value);
+	inputBox.value = "";
+}, false)
+
+</script>
+
+
+</body></html>

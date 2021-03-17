@@ -1,0 +1,30 @@
+﻿<form onsubmit="return false;">
+   <input id="inputbox" />
+   <button>Send</button>
+</form>
+<div id="messages" />
+
+<script>
+    var ws = new WebSocket("ws://localhost:26192/api/Chat/dsho");
+
+    const placeHolder = document.querySelector("#messages");
+    const button = document.querySelector("button");
+
+    ws.onopen = function () {
+        placeHolder.appendChild(document.createTextNode("Connected ..."));
+        button.addEventListener("click", sendMessage);
+    }
+
+    ws.onerror = function (event) {
+        //placeHolder.appendChild(document.createTextNode(event));
+        console.log(event);
+    };
+
+    ws.onmessage = function (event) {
+        placeHolder.appendChild(document.createTextNode(event.data));
+    };
+
+    function sendMessage() {
+        ws.send(document.querySelector("#inputbox").value);
+    }
+</script>

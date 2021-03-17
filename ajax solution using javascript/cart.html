@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        body {
+            font: 15px normal Arial, sans-serif;
+            color: #000000;
+        }
+        
+        label {
+            width: 5em;
+            display: inline-block;
+        }
+        
+        ul {
+            padding: 0;
+        }
+        
+        form {
+            display: inline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Shopping Cart</h1>
+    <ul>
+    </ul>
+    </form>
+    <hr>
+    <img src="cart.gif">
+    <hr>
+    <form method="POST" action="/">
+        <label for="name">Name</label> <input id="name" type="text" name="name" placeholder="Name"><br>
+        <label for="amount">Amount</label> <input id="amount" type="number" name="amount" placeholder="Amount"><br>
+        <input type="hidden" name="action" value="add">
+        <button type="submit">Add entry</button>
+    </form>
+    <script>
+        var entry = null;
+        document.querySelector('form').addEventListener('submit', submit);
+
+        fetchData();
+
+        function fetchData() {
+            //section for GET request
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var jsonResponse = JSON.parse(this.responseText);
+                        jsonResponse.forEach(item => addItem(item));
+                    }
+                }
+                //specifying the type of request
+            xhttp.open('GET', "/cart", true);
+            xhttp.send();
+        }
+
+        function submit(event) {
+            event.preventDefault();
+            if (entry != null) {
+                var data = {
+                    id: entry.id,
+                    name: document.getElementById("name").value,
+                    amount: document.getElementById("amount").value
+                };
+                const json = JSON.stringify(data); // when sending to server 
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.responseType = 'json';
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        console.log(this.response);
+                        //addItem(this.response);
+                        document.getElementById("name").value = "";
+                        document.getElementById("amount").value = "";
+                        entry = null;
+                        fetchData();
+                    }
+                };
+
+                xhttp.open("PUT", "/cart/" + entry.id, true);
+                xhttp.setRequestHeader("Content-Type", "application/json");
+                xhttp.send(json);
+            } else {
+                var data = {
+                    name: document.getElementById("name").value,
+                    amount: document.getElementById("amount").value
+
+                };
+                const json = JSON.stringify(data);
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.responseType = 'json';
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        addItem(this.response);
+                        document.getElementById("name").value = "";
+                        document.getElementById("amount").value = "";
+                    }
+                };
+
+                xhttp.open("POST", "/cart", true);
+                xhttp.setRequestHeader("Content-Type", "application/json");
+                xhttp.send(json);
+            }
+        }
+
+        function addItem(item) {
+            var li = document.createElement('li');
+            li.innerHTML = item.amount + ' X ' + item.name;
+            var updateButton = document.createElement('button');
+            updateButton.innerHTML = 'Update';
+            updateButton.addEventListener("click", function() {
+                editEntry(item.id);
+            });
+            var deleteButton = document.createElement('button');
+            deleteButton.innerHTML = 'Delete';
+            deleteButton.addEventListener("click", function() {
+                deleteItem(item.id);
+                this.parentNode.parentNode.removeChild(this.parentNode);
+            });
+            li.appendChild(updateButton);
+            li.appendChild(deleteButton);
+            document.querySelector('ul').appendChild(li);
+        }
+
+        function deleteItem(id) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    alert(this.response);
+                }
+            };
+            xhttp.open("DELETE", "/cart/" + id);
+            xhttp.send();
+        }
+
+        function editEntry(id) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        entry = JSON.parse(this.responseText);
+                        document.getElementById("name").value = entry.name;
+                        document.getElementById("amount").value = entry.amount;
+                    }
+                }
+                //specifying the type of request
+            xhttp.open('GET', "/cart/" + id, true);
+            xhttp.send();
+        }
+    </script>
+</body>
+
+</html>

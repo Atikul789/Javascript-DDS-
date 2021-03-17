@@ -1,0 +1,27 @@
+﻿<form onsubmit="return false;">
+    <input id="inputbox" />
+    <button>Send</button>
+</form>
+<div id="statusBox"></div>
+
+<script>
+    var ws = new WebSocket("ws://localhost:26192/api/EngineControl/controller");
+
+    const statusBox = document.querySelector("#statusBox");
+    const button = document.querySelector("button");
+
+    ws.onopen = function () {
+        statusBox.appendChild(document.createTextNode("Connected ..."));
+        button.addEventListener("click", sendMessage);
+    }
+
+    ws.onerror = function (event) {
+        console.log(event);
+    };
+
+    function sendMessage() {
+        console.log("Sending ...");
+        if (ws.readyState == 1)
+            ws.send(document.querySelector("#inputbox").value);
+    }
+</script>
