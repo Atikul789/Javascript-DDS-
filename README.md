@@ -1,2 +1,2 @@
 # Javascript-DDS-
-This repository contains my solution for exercise for design of distributed software course.
+This repository contains my javascript solution for exercise form design of distributed software course.
